@@ -660,6 +660,32 @@ section { position: relative; }
   .rec-yr { grid-row: 2; grid-column: 2; }
 }
 
+/* =================== EXPERIENCE =================== */
+.xp { list-style: none; margin: 0; padding: 0; }
+.xp > li { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: .4rem 2rem; padding: 1.6rem 0; border-top: 1px solid var(--line); }
+.xp > li:last-child { border-bottom: 1px solid var(--line); }
+.xp-when { align-self: start; margin: .3rem 0 0; font-family: var(--f-mono); font-size: .78rem; letter-spacing: .04em; color: var(--muted); display: flex; align-items: center; gap: .55rem; font-variant-numeric: tabular-nums; }
+.xp-body { display: flex; flex-direction: column; gap: .55rem; min-width: 0; }
+.xp-body h3, .xp-edu h3 { margin: 0; font-family: var(--f-display); font-weight: 800; font-stretch: 108%; font-size: clamp(1.15rem, 2vw, 1.4rem); letter-spacing: -.015em; line-height: 1.15; }
+.xp-role { margin: 0; color: var(--muted); font-size: .95rem; }
+.xp-text { margin: .15rem 0 0; line-height: 1.55; max-width: 62ch; }
+.xp-body .now-steps { margin-top: .35rem; }
+.xp-side { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.xp-wide { grid-column: 1 / -1; }
+.now-status.xp-past { color: var(--muted); }
+.xp-panel { border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--surface) 94%, transparent); padding: 1.5rem 1.4rem; display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; }
+.xp-edu { display: flex; flex-direction: column; gap: .35rem; }
+.xp-skills { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .7rem 1.2rem; }
+.xp-skills dt { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: .2rem; }
+.xp-skills dd { margin: 0; line-height: 1.45; }
+@media (max-width: 760px) {
+  .xp > li { grid-template-columns: minmax(0, 1fr); }
+  .xp-when { margin-top: 0; }
+  .xp-side { grid-template-columns: minmax(0, 1fr); }
+  .xp-skills { grid-template-columns: minmax(0, 1fr); gap: .25rem; }
+  .xp-skills dd + dt { margin-top: .6rem; }
+}
+
 /* =================== NOW + CONTACT =================== */
 .now-card {
   border: 1px solid var(--line); border-radius: 12px; padding: clamp(1.5rem, 4vw, 2.5rem);
@@ -788,6 +814,7 @@ body, body.portfolio {
   <ul class="navlinks">
     <li><a href="#zer0mask">zer0mask</a></li>
     <li><a href="#shelf-section">Work</a></li>
+    <li><a href="#experience">Experience</a></li>
     <li><a href="#record">Record</a></li>
     <li><a href="#now">Now</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -867,6 +894,107 @@ body, body.portfolio {
     <div class="wrap"><ul class="index" id="index" aria-label="All projects"></ul></div>
   </section>
 
+  <section class="block wrap" id="experience" aria-labelledby="xp-h">
+    <div class="sec-head">
+      <p class="eyebrow">Experience</p>
+      <h2 id="xp-h" class="tile-head" data-word="ROLES">Where I've worked</h2>
+    </div>
+    <ol class="xp">
+      <li>
+        <p class="xp-when"><span class="led"></span>Fall 2026 &ndash; now</p>
+        <div class="xp-body">
+          <h3>Florida Rocket Lab, University of Florida</h3>
+          <p class="xp-role">Combustion Devices team member &middot; Gainesville, FL</p>
+          <p class="xp-text">Helping design the combustion chamber for this year&rsquo;s rocket, in Florida&rsquo;s largest student-run rocketry organization.</p>
+        </div>
+      </li>
+      <li>
+        <p class="xp-when"><span class="led"></span>Fall 2026 &ndash; now</p>
+        <div class="xp-body">
+          <h3>Society of Asian Scientists and Engineers at UF</h3>
+          <p class="xp-role">Project Captain &middot; Gainesville, FL</p>
+          <p class="xp-text">The youngest project captain in the organization&rsquo;s history. I lead a 6-person team designing open-source AR glasses, so more people can get their hands on the technology.</p>
+        </div>
+      </li>
+      <li>
+        <p class="xp-when"><span class="led"></span>May 2025 &ndash; now</p>
+        <div class="xp-body">
+          <h3>Mohan Engineering Company</h3>
+          <p class="xp-role">Founder &amp; Lead Engineer &middot; Tampa, FL</p>
+          <p class="xp-text">I started the company to build affordable, accessible medical devices. I designed zer0mask for an $8 manufacturing cost and built 3 physical prototypes through 100+ part-level design iterations. I direct design work with a 12-engineer team on manufacturability, cost, and performance. 2 provisional patents filed, and working toward FDA approval.</p>
+          <ul class="now-steps" aria-label="Tools"><li>Product design</li><li>3D printing</li><li>Embedded electronics</li></ul>
+        </div>
+      </li>
+      <li>
+        <p class="xp-when">Aug 2024 &ndash; May 2026</p>
+        <div class="xp-body">
+          <h3>Middleton AFJROTC StellarXplorers</h3>
+          <p class="xp-role">Founder &amp; Captain &middot; Tampa, FL</p>
+          <p class="xp-text">Founded and led a team for two years in a national competition on designing satellites, launch vehicles, and orbital trajectories. I set the teamI set the team&rsquo;s strategy and ran its technical work.rsquo;s strategy and ran its technical work, and we reached #4 in the national rankings at our peak.</p>
+          <ul class="now-steps" aria-label="Tools"><li>Ansys STK</li><li>Orbital mechanics</li></ul>
+        </div>
+      </li>
+      <li>
+        <p class="xp-when">Aug 2024 &ndash; May 2026</p>
+        <div class="xp-body">
+          <h3>Middleton Rocketry Team</h3>
+          <p class="xp-role">Founder &amp; Commander &middot; Tampa, FL</p>
+          <p class="xp-text">Started a model rocketry program and wrote its curriculum on rocket design, construction, and launch. I built 3 rockets myself. The program built 50+, each launched at least twice, for 100+ launches.</p>
+        </div>
+      </li>
+      <li>
+        <p class="xp-when">Mar &ndash; Aug 2024</p>
+        <div class="xp-body">
+          <h3>Brahmastra Aerospace</h3>
+          <p class="xp-role">Satellite Design Intern &middot; Remote</p>
+          <p class="xp-text">Designed the mechanical frame of a 1U CubeSat for a satellite slated for an ISRO launch in 2028. Designed its monopropellant fuel injection system and integrated it with the structure. Wrote MATLAB simulations to check attitude control performance and guide the attitude control design.</p>
+          <ul class="now-steps" aria-label="Tools"><li>SolidWorks</li><li>Fusion 360</li><li>MATLAB</li></ul>
+        </div>
+      </li>
+      <li>
+        <p class="xp-when">Jan &ndash; Sept 2024</p>
+        <div class="xp-body">
+          <h3>American Society of Mechanical Engineers</h3>
+          <p class="xp-role">Student Researcher &middot; Tampa, FL</p>
+          <p class="xp-text">Led a 5-person research team designing a small aluminum-air battery that could power a smartphone, with features to get around the corrosion that limited earlier designs. Presented the findings at ASME POWER 2024.</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section class="block wrap" id="education" aria-labelledby="edu-h">
+    <div class="sec-head">
+      <p class="eyebrow">Education</p>
+      <h2 id="edu-h" class="tile-head" data-word="STUDY">Where I've learned</h2>
+    </div>
+    <div class="xp-side">
+      <div class="xp-panel">
+        <p class="now-status"><span class="led"></span>Now</p>
+        <div class="xp-edu">
+          <h3>University of Florida</h3>
+          <p class="xp-role">Dual degree, B.S. Mechanical Engineering and B.S. Aerospace Engineering</p>
+          <p class="xp-role">Gainesville, FL &middot; Expected May 2030</p>
+        </div>
+      </div>
+      <div class="xp-panel">
+        <p class="now-status xp-past">Class of 2026</p>
+        <div class="xp-edu">
+          <h3>Middleton High School</h3>
+          <p class="xp-role">Engineering Magnet Program</p>
+          <p class="xp-role">Tampa, FL &middot; Graduated May 2026 &middot; SAT 1540</p>
+        </div>
+      </div>
+      <div class="xp-panel xp-wide">
+        <p class="now-status xp-past">Tools</p>
+        <dl class="xp-skills">
+          <dt>CAD</dt><dd>SolidWorks, Inventor, Fusion 360, AutoCAD, Shapr3D, NX (basic)</dd>
+          <dt>Analysis &amp; code</dt><dd>MATLAB, Python, C++, Ansys Fluent (CFD), Ansys STK</dd>
+          <dt>Languages</dt><dd>English (fluent), Malayalam (intermediate)</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
   <section class="block wrap" id="record" aria-labelledby="stats">
     <div class="sec-head">
       <p class="eyebrow">Statistics</p>
@@ -889,7 +1017,7 @@ body, body.portfolio {
       <li><span class="tag y">Team</span><span class="rec-what">FIRST Championship world qualifier</span><span class="rec-where">FRC Team 1369, Minotaur</span><span class="rec-yr"></span></li>
       <li><span class="tag y">Team</span><span class="rec-what">Inspire Award</span><span class="rec-where">FIRST Tech Challenge, R.O.B.O.T League</span><span class="rec-yr"></span></li>
       <li><span class="tag y">Team</span><span class="rec-what">Top 10 Air Force teams nationally</span><span class="rec-where">AFJROTC Academic Bowl</span><span class="rec-yr"></span></li>
-      <li><span class="tag">Lead</span><span class="rec-what">StellarXplorers Commander</span><span class="rec-where">Led a satellite mission-planning team that reached the national top 10 in qualifying</span><span class="rec-yr"></span></li>
+      <li><span class="tag">Lead</span><span class="rec-what">StellarXplorers Commander</span><span class="rec-where">Led a satellite mission-planning team that reached #4 in the national rankings at its peak</span><span class="rec-yr"></span></li>
       <li><span class="tag">Funding</span><span class="rec-what">Sponsored by Samsung and the Bay Area Manufacturers Association</span><span class="rec-where">Mohan Engineering Company</span><span class="rec-yr"></span></li>
     </ul>
   </section>
