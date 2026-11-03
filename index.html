@@ -449,7 +449,12 @@ section { position: relative; }
 .floor-shadow { position: absolute; transform-origin: top center; background: radial-gradient(closest-side, rgba(0,0,0,.9), transparent); pointer-events: none; }
 .shelf-row { position: absolute; display: flex; align-items: flex-end; justify-content: center; gap: 3px; transform-style: preserve-3d; }
 .book-wrap { position: relative; transform-style: preserve-3d; flex: none; }
-.book-wrap.lean { transform: rotateZ(-7deg); transform-origin: bottom left; margin-left: 22px; }
+/* Books lying flat in a small stack. Nothing on the shelf is tilted, because a tilted 3D book makes Chrome leave gaps in the cabinet. */
+.book-stack { display: flex; flex-direction: column-reverse; align-items: flex-start; transform-style: preserve-3d; flex: none; margin-left: 4px; }
+.book-stack .book-wrap + .book-wrap { margin-left: 7px; }
+.book-wrap.flat .spine { flex-direction: row; padding: 0 9px; }
+.book-wrap.flat .spine .bands { flex-direction: row; width: auto; height: 64%; }
+.book-wrap.flat .spine .band { width: 2px; height: auto; }
 .book {
   position: absolute; inset: 0; transform-style: preserve-3d;
   transform: translateZ(calc(var(--D) / -2));
@@ -1337,7 +1342,7 @@ body, body.portfolio {
   // Unlabeled books that make the shelf feel lived in
   const DECOR = [
     { at: 0, color: "#4A3B32", w: 30, h: 206 }, { at: 0, color: "#2A2D2A", w: 24, h: 222 },
-    { at: 5, color: "#5C5048", w: 28, h: 200, lean: true }
+    { at: 5, stack: [{ color: "#5C5048", w: 98, h: 24 }, { color: "#3E4A43", w: 84, h: 19 }] }
   ];
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const wait = ms => new Promise(r => setTimeout(r, reduced ? 0 : ms));
@@ -1351,7 +1356,7 @@ body, body.portfolio {
 
   function makeBook(b, i) {
     const wrap = document.createElement("div");
-    wrap.className = "book-wrap" + (b.lean ? " lean" : "");
+    wrap.className = "book-wrap" + (b.w > b.h ? " flat" : "");
     wrap.style.width = b.w + "px"; wrap.style.height = b.h + "px";
     wrap.style.setProperty("--w", b.w + "px"); wrap.style.setProperty("--h", b.h + "px");
     const el = document.createElement(b.decor ? "div" : "button");
@@ -1366,7 +1371,7 @@ body, body.portfolio {
       "</div>" +
       '<div class="face side l" style="' + bg + '"></div>' +
       '<div class="face side r" style="' + bg + '"></div>' +
-      '<div class="face top" style="border-color:' + b.color + '"></div>';
+      '<div class="face top" style="border-color:' + b.color + (b.w > b.h ? ';background:' + b.color + ';filter:brightness(1.12)' : '') + '"></div>';
     wrap.appendChild(el);
     if (!b.decor) {
       el.addEventListener("click", () => openBook(b, i, el));
@@ -1378,11 +1383,19 @@ body, body.portfolio {
     return wrap;
   }
 
+  function makeDecor(d) {
+    if (!d.stack) return makeBook({ ...d, decor: true });
+    const st = document.createElement("div");
+    st.className = "book-stack";
+    d.stack.forEach(b => st.appendChild(makeBook({ ...b, decor: true })));
+    return st;
+  }
+
   PROJECTS.forEach((p, i) => {
-    DECOR.filter(d => d.at === i).forEach(d => shelf.appendChild(makeBook({ ...d, decor: true })));
+    DECOR.filter(d => d.at === i).forEach(d => shelf.appendChild(makeDecor(d)));
     shelf.appendChild(makeBook(p, i));
   });
-  DECOR.filter(d => d.at >= PROJECTS.length).forEach(d => shelf.appendChild(makeBook({ ...d, decor: true })));
+  DECOR.filter(d => d.at >= PROJECTS.length).forEach(d => shelf.appendChild(makeDecor(d)));
 
   // Plain list of the same books, for anyone who'd rather not spin a shelf
   const indexEl = document.getElementById("index");
