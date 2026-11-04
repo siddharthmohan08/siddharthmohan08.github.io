@@ -835,6 +835,37 @@ body, body.portfolio {
 .zoom { background: rgba(4,14,32,.94); }
 .marquee { background: color-mix(in srgb, var(--bg) 70%, transparent); }
 
+/* =================== MOTION: THE PAGE AS A PLOT ===================
+   A pen draws a line under the nav as you scroll, the nav reads out which sheet you are on, rows plot in one by one,
+   buttons pull toward the cursor, and a click leaves a compass mark. */
+html.lenis { scroll-behavior: auto; }
+html.lenis.lenis-stopped { overflow: hidden; }
+.plot { position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; pointer-events: none; opacity: 0; transition: opacity .4s; }
+.topnav.scrolled .plot { opacity: 1; }
+.plot i { position: absolute; inset: 0; background: var(--green); transform-origin: left; transform: scaleX(var(--p, 0)); }
+.plot b { position: absolute; top: -3px; left: calc(var(--p, 0) * 100%); width: 7px; height: 7px; margin-left: -3.5px; border: 1px solid var(--green); border-radius: 50%; background: var(--bg); box-shadow: 0 0 10px var(--green); }
+.sheet-no { margin: 0; font-family: var(--f-mono); font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); white-space: nowrap; display: flex; gap: .6rem; align-items: center; }
+.sheet-no b { font-weight: 500; color: var(--green-ink); font-variant-numeric: tabular-nums; }
+.sheet-no span { display: inline-block; min-width: 10ch; }
+.sheet-no span.flip { animation: sheetflip .45s cubic-bezier(.2,.8,.2,1); }
+@keyframes sheetflip { from { opacity: 0; transform: translateY(6px); } }
+.navlinks a { position: relative; }
+.navlinks a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px; background: var(--green); transform: scaleX(0); transform-origin: left; transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+.navlinks a.cur { color: var(--fg); }
+.navlinks a.cur::after { transform: scaleX(1); }
+@media (max-width: 1180px) { .sheet-no { display: none; } }
+
+.stag:not(.in) > * { opacity: 0; }
+.stag.in > * { animation: plotin .75s cubic-bezier(.2,.7,.2,1) backwards; animation-delay: calc(var(--s, 0) * 55ms); }
+@keyframes plotin { from { opacity: 0; transform: translateY(16px); clip-path: inset(0 100% 0 0); } 60% { clip-path: inset(0 0 0 0); } to { opacity: 1; transform: none; clip-path: inset(0 0 0 0); } }
+
+.mag { transition: translate .45s cubic-bezier(.2,.8,.2,1), background .2s, color .2s, border-color .2s; }
+
+.cmark { position: fixed; left: 0; top: 0; z-index: 80; pointer-events: none; width: 64px; height: 64px; margin: -32px 0 0 -32px; color: var(--green-ink); }
+.cmark svg { width: 100%; height: 100%; overflow: visible; }
+.cmark circle, .cmark path { fill: none; stroke: currentColor; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.cmark text { font-family: var(--f-mono); font-size: 7px; letter-spacing: .1em; fill: currentColor; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
   html { scroll-behavior: auto; }
@@ -885,6 +916,8 @@ body, body.portfolio {
 
 <nav class="topnav" id="topnav" aria-label="Sections" hidden>
   <a class="brand" href="#top"><i aria-hidden="true">S</i>Siddharth Mohan</a>
+  <p class="sheet-no" id="sheet-no" aria-hidden="true">Sheet <b id="sheet-n">01/08</b><span id="sheet-t">Overview</span></p>
+  <div class="plot" aria-hidden="true"><i></i><b></b></div>
   <ul class="navlinks">
     <li><a href="#zer0mask">zer0mask</a></li>
     <li><a href="#shelf-section">Work</a></li>
@@ -972,7 +1005,7 @@ body, body.portfolio {
     <div class="sec-head">
       <p class="eyebrow">Experience</p>
       <h2 id="xp-h" class="tile-head" data-word="ROLES">Revision history</h2>
-      <p class="sec-sub">Every drawing keeps a log of what changed. This is mine.<span class="rev-hint"> Hover a revision to see a sketch of the work.</span></p>
+      <p class="sec-sub">Every drawing keeps a log of what changed. This is mine.<span class="rev-hint"> Scroll or hover through the revisions to see a sketch of each.</span></p>
     </div>
     <div class="rev-sheet">
       <div class="rev-table">
@@ -1164,7 +1197,7 @@ body, body.portfolio {
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
     function show(r) {
       if (r.classList.contains("on") && art.innerHTML) return;
-      rows.forEach(x => x.classList.toggle("on", x === r));
+      rows.forEach(x => x.classList.toggle("on", x === r)); window.revCur = r;
       art.innerHTML = svg(r.dataset.fig);
       rev.textContent = "Detail " + r.querySelector(".rev-letter span").textContent;
       cap.textContent = r.dataset.cap; org.textContent = r.dataset.org;
@@ -1173,7 +1206,7 @@ body, body.portfolio {
       art.classList.remove("draw"); void art.offsetWidth; art.classList.add("draw");
     }
     rows.forEach(r => { r.addEventListener("pointerenter", () => show(r)); r.addEventListener("focus", () => show(r)); });
-    show(rows[0]);
+    show(rows[0]); window.revShow = show;
   })();
   </script>
 
@@ -2105,6 +2138,147 @@ function zmStatic() {
   fig.innerHTML = '<img src="' + (window.ZM_PHOTO || "") + '" alt="The zer0mask prototype next to its HOSA medal">';
   sec.querySelector(".zm-sticky").appendChild(fig);
 }
+</script>
+<script>
+// Motion layer: smooth scrolling, a pen that plots scroll progress under the nav, a sheet readout,
+// rows that plot in one by one, the revision log stepping with the scroll, magnetic buttons, and compass marks on click.
+(function () {
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const fine = matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const nav = document.getElementById("topnav"), plot = nav.querySelector(".plot");
+  const sheetN = document.getElementById("sheet-n"), sheetT = document.getElementById("sheet-t");
+  const SHEETS = [["top", "Overview"], ["zer0mask", "zer0mask"], ["shelf-section", "Work"], ["experience", "Experience"],
+    ["education", "Education"], ["record", "Record"], ["now-section", "Now"], ["contact", "Contact"]]
+    .map(([id, t]) => [document.getElementById(id), t]).filter(s => s[0]);
+  const links = [...nav.querySelectorAll(".navlinks a")];
+  const pad = (n, w) => String(n).padStart(w || 2, "0");
+  let lenis = null, sheet = -1, started = false;
+
+  // ---------- Smooth scrolling (mouse and trackpad only; touch keeps native scrolling) ----------
+  function startLenis() {
+    if (reduced || !fine || !window.Lenis || lenis) return;
+    try {
+      lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+      const raf = t => { lenis.raf(t); requestAnimationFrame(raf); };
+      requestAnimationFrame(raf);
+      const reader = document.getElementById("reader"), zoom = document.getElementById("zoom");
+      [reader, zoom].forEach(el => el && el.setAttribute("data-lenis-prevent", ""));
+      if (reader) new MutationObserver(() => { reader.hidden ? lenis.start() : lenis.stop(); }).observe(reader, { attributes: true, attributeFilter: ["hidden"] });
+      // In-page links glide instead of jumping
+      document.addEventListener("click", e => {
+        const a = e.target.closest('a[href^="#"]');
+        if (!a || a.closest("#reader") || e.defaultPrevented) return;
+        const t = document.querySelector(a.getAttribute("href")); if (!t) return;
+        e.preventDefault();
+        lenis.scrollTo(t, { offset: -72, duration: 1.4 });
+      });
+    } catch (_) { lenis = null; }
+  }
+  if (!reduced && fine) {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js";
+    s.onload = () => { if (started) startLenis(); };
+    document.head.appendChild(s);
+  }
+
+  // ---------- Pen plot + sheet readout + current nav link ----------
+  function update() {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    plot.style.setProperty("--p", max > 0 ? Math.min(1, Math.max(0, scrollY / max)).toFixed(4) : 0);
+    const mid = innerHeight * 0.4;
+    let k = 0;
+    SHEETS.forEach((s, i) => { if (s[0].getBoundingClientRect().top <= mid) k = i; });
+    if (k !== sheet) {
+      sheet = k;
+      sheetN.textContent = pad(k + 1) + "/" + pad(SHEETS.length);
+      sheetT.textContent = SHEETS[k][1];
+      if (!reduced) { sheetT.classList.remove("flip"); void sheetT.offsetWidth; sheetT.classList.add("flip"); }
+      const id = SHEETS[k][0].id;
+      links.forEach(a => {
+        const h = a.getAttribute("href");
+        a.classList.toggle("cur", h === "#" + id || (id === "now-section" && h === "#now") || (id === "education" && h === "#experience"));
+      });
+    }
+    stepRevisions();
+  }
+
+  // ---------- Revision log follows the scroll (hover still takes over) ----------
+  const table = document.querySelector(".rev-table"), revRows = [...document.querySelectorAll(".rev-row")];
+  let overTable = false;
+  if (table) {
+    table.addEventListener("pointerenter", () => { overTable = true; });
+    table.addEventListener("pointerleave", () => { overTable = false; });
+  }
+  function stepRevisions() {
+    if (!table || overTable || !window.revShow || innerWidth <= 960) return;
+    const tr = table.getBoundingClientRect();
+    if (tr.bottom < 0 || tr.top > innerHeight) return;
+    const line = innerHeight * 0.45;
+    let best = null, bd = 1e9;
+    revRows.forEach(r => { const b = r.getBoundingClientRect(), d = Math.abs((b.top + b.bottom) / 2 - line); if (d < bd) { bd = d; best = r; } });
+    if (best && best !== window.revCur) window.revShow(best);
+  }
+
+  let ticking = false;
+  const onScroll = () => { if (ticking) return; ticking = true; requestAnimationFrame(() => { ticking = false; update(); }); };
+  addEventListener("scroll", onScroll, { passive: true });
+  addEventListener("resize", onScroll);
+
+  // ---------- Rows plot in one after another ----------
+  function stagger() {
+    if (reduced) return;
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add("in"); io.unobserve(e.target);
+    }), { rootMargin: "0px 0px -12% 0px" });
+    document.querySelectorAll("#work .rev-list, #work .record, #work .dsh-rows, #work .links, #work .now-steps").forEach(g => {
+      if (g.getBoundingClientRect().top < innerHeight * 0.88) return; // already on screen: leave it be
+      [...g.children].forEach((c, i) => c.style.setProperty("--s", Math.min(i, 14)));
+      g.classList.add("stag"); io.observe(g);
+    });
+  }
+
+  // ---------- Buttons lean toward the cursor ----------
+  function magnets() {
+    if (reduced || !fine) return;
+    document.querySelectorAll("#work .pill, .topnav .pill, #copy-email, #work .links a").forEach(el => {
+      el.classList.add("mag");
+      const k = el.matches(".links a") ? 0.06 : 0.28;
+      el.addEventListener("pointermove", e => {
+        const r = el.getBoundingClientRect();
+        el.style.translate = ((e.clientX - r.left - r.width / 2) * k).toFixed(1) + "px " + ((e.clientY - r.top - r.height / 2) * k * 1.3).toFixed(1) + "px";
+      });
+      el.addEventListener("pointerleave", () => { el.style.translate = ""; });
+    });
+  }
+
+  // ---------- A click leaves a compass mark with its coordinates ----------
+  function compass(e) {
+    if (reduced || !document.body.classList.contains("portfolio") || e.button !== 0) return;
+    if (e.target.closest("#reader, #zoom, .shelf-scene, .zm-canvas, input, textarea")) return;
+    const m = document.createElement("div");
+    m.className = "cmark"; m.setAttribute("aria-hidden", "true");
+    m.style.transform = "translate(" + e.clientX + "px," + e.clientY + "px)";
+    const x = pad(Math.round(e.clientX), 4), y = pad(Math.round(e.clientY + scrollY), 4);
+    m.innerHTML = '<svg viewBox="-32 -32 64 64"><circle r="18"/><path d="M-28 0 H-8 M8 0 H28 M0 -28 V-8 M0 8 V28"/><text x="22" y="-22">X' + x + " Y" + y + "</text></svg>";
+    document.body.appendChild(m);
+    const c = m.querySelector("circle"), p = m.querySelector("path"), t = m.querySelector("text");
+    c.animate([{ strokeDasharray: "0 120" }, { strokeDasharray: "114 120" }], { duration: 420, easing: "cubic-bezier(.3,.7,.3,1)", fill: "forwards" });
+    p.animate([{ opacity: 0, transform: "scale(.4)" }, { opacity: 1, transform: "scale(1)" }], { duration: 300, easing: "ease-out", fill: "forwards" });
+    t.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 150, fill: "backwards" });
+    m.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 500, delay: 650, fill: "forwards" }).onfinish = () => m.remove();
+  }
+  addEventListener("pointerdown", compass, { passive: true });
+
+  function begin() {
+    if (started) return;
+    started = true;
+    startLenis();
+    requestAnimationFrame(() => { stagger(); magnets(); update(); });
+  }
+  document.addEventListener("portfolio:open", begin);
+  if (document.body.classList.contains("portfolio")) begin();
+})();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
