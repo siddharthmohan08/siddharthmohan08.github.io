@@ -933,13 +933,8 @@ html.lenis.lenis-stopped { overflow: hidden; }
 <!-- ============ PORTFOLIO ============ -->
 <main id="work" hidden>
   <section class="hero wrap" id="top">
-    <ul class="chips reveal" style="--i:0" aria-label="Quick facts">
-      <li><span class="led"></span>Open to building</li>
-      <li>University of Florida</li>
-      <li>Class of 2030</li>
-    </ul>
-    <h1 class="name reveal" style="--i:1"><span class="n1">Siddharth</span><span class="n2">Mohan<span class="dot" aria-hidden="true">.</span></span></h1>
-    <div class="hero-foot reveal" style="--i:2">
+    <h1 class="name reveal" style="--i:0"><span class="n1">Siddharth</span><span class="n2">Mohan<span class="dot" aria-hidden="true">.</span></span></h1>
+    <div class="hero-foot reveal" style="--i:1">
       <div class="hero-lede">
         <div class="mini-tiles" role="img" aria-label="MAKER">
           <span style="--k:0">M</span><span style="--k:1">A</span><span style="--k:2">K</span><span style="--k:3">E</span><span style="--k:4">R</span>
@@ -953,7 +948,6 @@ html.lenis.lenis-stopped { overflow: hidden; }
         <div><dt>Since</dt><dd>Third grade, with a solar-powered cooling hat</dd></div>
       </dl>
     </div>
-    <a class="scroll-cue reveal" style="--i:3" href="#zer0mask"><span>Scroll</span><i></i></a>
   </section>
 
   <div class="marquee" aria-hidden="true">
@@ -2562,7 +2556,7 @@ function zmInit() {
 
   let visible = false, t0 = performance.now(), lastNarrow = null;
   const copyFade = document.querySelectorAll(".zm-lede, .zm-stats");
-  const copyEl = document.querySelector(".zm-copy");
+  const copyEl = document.querySelector(".zm-copy"), progEl = document.querySelector(".zm-progress");
   function frame(now) {
     if (!visible) return;
     const dt = Math.min(50, now - t0); t0 = now;
@@ -2597,7 +2591,14 @@ function zmInit() {
     const wExt = lerp(60, 112, ep) * 1.25;
     const tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     const narrow = W < 800;
-    const usableW = narrow ? .92 : .55, usableH = narrow ? lerp(.5, .8, ep) : .84;
+    const usableW = narrow ? .92 : .55;
+    let usableH = narrow ? lerp(.5, .8, ep) : .84, offY = -H * lerp(.17, .05, ep);
+    // On phones, fit the model into the space actually left between the text and the progress bar
+    if (narrow && progEl) {
+      const cr = canvas.getBoundingClientRect(), top = copyEl.getBoundingClientRect().bottom - cr.top + 12, bot = progEl.getBoundingClientRect().top - cr.top - 12;
+      const f = clamp01(1 - (p - .3) / .2);
+      if (bot - top > 80) { usableH = lerp(usableH, (bot - top) / H * .94, f); offY = lerp(offY, H / 2 - (top + bot) / 2, f); }
+    }
     if (narrow !== lastNarrow || narrow) {
       const f = narrow ? clamp01(1 - (p - .3) / .2) : 1;
       copyFade.forEach(el => { el.style.opacity = f; });
@@ -2606,7 +2607,7 @@ function zmInit() {
     let dist = Math.max(hExt / 2 / (tanH * usableH), wExt / 2 / (tanH * camera.aspect * usableW));
     camera.position.set(0, cy + dist * .22, dist);
     camera.lookAt(0, cy, 0);
-    if (narrow) camera.setViewOffset(W, H, 0, -H * lerp(.17, .05, ep), W, H);
+    if (narrow) camera.setViewOffset(W, H, 0, offY, W, H);
     else camera.setViewOffset(W, H, -W * .2, 0, W, H);
 
     // mist fades out as it comes apart
