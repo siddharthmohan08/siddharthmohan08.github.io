@@ -1669,13 +1669,23 @@ html.lenis.lenis-stopped { overflow: hidden; }
          { h: "My part", p: "I designed the custom camera rig that lets our three cameras accurately track both the arm and the desk. Every part is built to be as precise as possible while staying very affordable.", p2: "I also helped with testing and troubleshooting." }],
         [{ h: "The team", p: "Vishal Naveen came up with the idea and wrote the software, with Srijan Kumbam, Hao Tran, and me. Next we’re making it reliable, then testing it with the people it’s built for." }]
       ],
-      link: { label: "See it on Devpost", href: "https://devpost.com/software/beforehand-eliv7x" } }
+      link: { label: "See it on Devpost", href: "https://devpost.com/software/beforehand-eliv7x" } },
+    { title: "Cooler Cap", meta: "My first project. A hat with a solar-powered fan", color: "#C7743A", ink: "#FFF6EC", w: 38, h: 214,
+      pages: [
+        [{ h: "What it is", p: "A hat with a solar panel that powers a small fan. It was the first thing I ever built." },
+         { h: "Why I built it", p: "The sun is what makes you hot when you're outside. I wanted to turn that around, so the thing that heats you up is also what cools you down." }],
+        [{ h: "How it works", steps: [
+            "Sunlight hits the solar panel on the hat.",
+            "The panel powers a small fan.",
+            "The fan blows air on you. The stronger the sun, the more power the fan gets." ] },
+         { h: "Where it started", p: "I built it in third grade. Everything else on this shelf started here." }]
+      ] }
   ];
   window.ZM_PHOTO = PROJECTS[0].img; // used if the 3D model can't run
   // Unlabeled books that make the shelf feel lived in
   const DECOR = [
     { at: 0, color: "#4A3B32", w: 30, h: 206 }, { at: 0, color: "#2A2D2A", w: 24, h: 222 },
-    { at: 5, color: "#5C5048", w: 28, h: 200, lean: true }
+    { at: 6, color: "#5C5048", w: 28, h: 200, lean: true }
   ];
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const wait = ms => new Promise(r => setTimeout(r, reduced ? 0 : ms));
